@@ -201,6 +201,7 @@ if the H<sub>0</sub> is true
 ---
 
 ## References
+* [Inferential Statistics](https://www.khanacademy.org/math/probability/statistics-inferential)
 * [Confidence Interval or P-value?](http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2689604/)
 * Nature Methods - [Points of Significance](http://www.nature.com/collections/qghhqm/pointsofsignificance)
  * [Importance of Being Uncertain](http://www.nature.com/nmeth/journal/v10/n9/full/nmeth.2613.html)
@@ -210,4 +211,5 @@ if the H<sub>0</sub> is true
 * [Five Guidelines for Using P values](http://blog.minitab.com/blog/adventures-in-statistics/five-guidelines-for-using-p-values)
 * [How to calculate P Value](http://www.wikihow.com/Calculate-P-Value)
 * [Compare observed and expected frequencies](http://graphpad.com/support/faqid/1789/)
+* [How Not To Run An A/B Test](http://www.evanmiller.org/how-not-to-run-an-ab-test.html) - Nice article on why you should resist leaking preliminary results.
 * Do [the test](http://onlinestatbook.com/2/logic_of_hypothesis_testing/sign_conf.html)

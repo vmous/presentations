@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<title>deck.html<intro-to-fp></title>
+
+</head>
+
+<body>
+
+<h1 id="introductiontofunctionalprogramming">Introduction to Functional Programming</h1>
+
+<p><strong>Vassilis Moustakas</strong></p>
+
+<p>vsmoustakas@gmail.com</p>
+
+<p><a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/black.css'); return false;">Black (default)</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/white.css'); return false;">White</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/league.css'); return false;">League</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/sky.css'); return false;">Sky</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/beige.css'); return false;">Beige</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/simple.css'); return false;">Simple</a> <br>
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/serif.css'); return false;">Serif</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/blood.css'); return false;">Blood</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/night.css'); return false;">Night</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/moon.css'); return false;">Moon</a> -
+<a href="#" onclick="document.getElementById('theme').setAttribute('href','css/theme/solarized.css'); return false;">Solarized</a></p>
+
+<p><a href="?theme=sky#/themes">Sky</a> -
+<a href="?theme=beige#/themes">Beige</a> -
+<a href="?theme=simple#/themes">Simple</a> -
+<a href="?theme=serif#/themes">Serif</a> -
+<a href="?theme=night#/themes">Night</a> -
+<a href="?#/themes">Default</a></p>
+
+<p><a href="?transition=none#/transitions">None</a> -
+<a href="?transition=fade#/transitions">Fade</a> -
+<a href="?transition=slide#/transitions">Slide</a> -
+<a href="?transition=convex#/transitions">Convex</a> -
+<a href="?transition=concave#/transitions">Concave</a> -
+<a href="?transition=zoom#/transitions">Zoom</a></p>
+
+<p><a href="?transition=cube#/transitions">Cube</a> -
+<a href="?transition=page#/transitions">Page</a> -
+<a href="?transition=concave#/transitions">Concave</a> -
+<a href="?transition=zoom#/transitions">Zoom</a> -
+<a href="?transition=linear#/transitions">Linear</a> -
+<a href="?transition=fade#/transitions">Fade</a> -
+<a href="?transition=none#/transitions">None</a> -
+<a href="?#/transitions">Default</a></p>
+
+<hr />
+
+<h2 id="programmingparadigms">Programming Paradigms</h2>
+
+<p>A <em>paradigm</em> is a set of distinct concepts and thought patterns in some scientific decipline.</p>
+
+<p>In software engineering we (mainly) have:</p>
+
+<ul>
+<li><strong><em>imperative</em></strong> programming</li>
+<li><strong><em>declarative</em></strong> programming</li>
+</ul>
+
+<p>Orthogonal:
+ * <strong><em>object-oriented</em></strong> programming</p>
+
+<p>Note:
+https://www.youtube.com/playlist?list=PLycnP7USbo1V3jlyjAzWUB201cLxPq4NP
+https://youtu.be/8b4Ynp30nIA?list=PLycnP7USbo1V3jlyjAzWUB201cLxPq4NP</p>
+
+<p>TODO:</p>
+
+<hr />
+
+<h2 id="imperativeprogramming">Imperative Programming</h2>
+
+<p>Focuses on specifying <strong><em>how</em></strong> the program should achieve the result.</p>
+
+<p>Computation as statements that directly change a program <strong>state</strong> (datafields).</p>
+
+<p>Is the current state of the art. C, C++, Java etc.</p>
+
+<p>Note:
+Like the impertative mood in natural languages expresses commands, an imperative program consists of commands for the computer to perform.</p>
+
+<p>Impertative programming is about:
+* modifying mutable variables
+* using assignmnts
+* and control sequences such as if-then-else, loops, breaks, continue, return.</p>
+
+<p>TODO:</p>
+
+<hr />
+
+<h2 id="declarativeprogramming">Declarative Programming</h2>
+
+<p>Focuses on <strong><em>what</em></strong> the program should accomplish.</p>
+
+<p>Computation logic without defining detailed control flow.</p>
+
+<p>Types:
+* <strong><em>functional</em></strong> programming (e.g., Lisp, Haskell, Scala)
+* <strong><em>logic</em></strong> programming (e.g., Prolog)
+* <strong><em>term rewritting</em></strong></p>
+
+<p>Note:
+Programs describe their desired results without explicitly listing commands or steps that must be performed.</p>
+
+<p>TODO:
+Add example of term rewritting</p>
+
+<hr />
+
+<h2 id="thebirthofthefunctionalstyle">The Birth of the Functional Style</h2>
+
+<p>Problem<sup>*</sup>: Imperative programming forces conceptualization of data-structures <em>word-by-word</em> (a.k.a. &#8220;von Neumann bottleneck&#8221;).</p>
+
+<p>Solution<sup>**</sup>: Develop high-level abstractions (i.e., collections, polynomials, strings etc.) with supporting <strong><em>theories</em></strong> so that we are able to reason about them.</p>
+
+<p style="font-size: 30px;"><sup>\*</sup>, <sup>\*\*</sup> John Backus, *Can Programming Be Liberated from the von Neumann Style? A Functional Style and Its Algebra of Programms*, 1977 ACM Turing Award Lecture, 1978</p>
+
+<p>Note:</p>
+
+<p>Strong correspondence between imperative paradigm and the von Neuman computer:
+* Mutable variables ~ memory cells
+* Variable dereferences ~ load instructions
+* Variable assignments ~ store instructions
+* Control structures ~ loops</p>
+
+<p>Pure imperative programming does not scale.</p>
+
+<hr />
+
+<h2 id="theoriesforhigh-levelabstractions">Theories for High-Level Abstractions</h2>
+
+<p>Mathematical theories describe:
+* one or more data types,
+* operations on these data types,
+* laws that describe relationships between values and operations.</p>
+
+<p>Mathematical theories cannot describe <strong><em>mutation</em></strong> (making a change while keeping the identity the same).</p>
+
+<p>Some languages do get strings theory right by making them immutable (i.e., Java). </p>
+
+<hr />
+
+<h2 id="functionalprogramming">Functional Programming</h2>
+
+<pre><code class="java">class Foo {
+    int x
+    ...
+    static int f(int x) {
+        ...
+        y = x * x
+        ...
+        return y
+    }
+}
+</code></pre>
+
+<p>Functions are data too and thus so ordinary that we can use it wherever we use data.</p>
+
+<hr />
+
+<h1 id="monads">Monads</h1>
+
+<blockquote>
+<blockquote>
+<blockquote>
+<h2 id="whyshouldicare">Why should I care?</h2>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p>Understand why Scala can do this so</p>
+
+<p>A monad is a construction that, given an underlying type sytem, embeds a corresponding type system (called <strong><em>monadic type system</em></strong>) into it.</p>
+
+<blockquote>
+<blockquote>
+<blockquote>
+<h2 id="whatisamonad">What is a Monad?</h2>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p>A <strong><em>monad</em></strong> <code>M</code> is a paramentric type <code>M[T]</code> with three components<sup>*</sup>:
+* a type constructor <code>M</code>
+* a unary operation <code>unit</code><sup>**</sup>
+* a binary operation <code>bind</code><sup>**</sup></p>
+
+<hr />
+
+<p><sup>*</sup> <a href="https://en.wikipedia.org/wiki/Kleisli_triple">Kleisli triple</a> formulation</p>
+
+<p><sup>**</sup> must adhere to some axioms, called <strong><em>monad laws</em></strong> </p>
+
+<p>Note:</p>
+
+<p>In Haskell the <code>bind</code> operator is <code>&gt;&gt;=</code>
+In Scala: <code>bind</code> === <code>flatmap</code>
+In the literature: <code>unit</code> === <code>return</code> </p>
+
+<pre><code class="scala">trait M[T] {
+    def flatMap[U](f: T =&gt; M[U]): M[U]
+}
+
+def unit[T](x: T): M[T]
+</code></pre>
+
+<blockquote>
+<blockquote>
+<blockquote>
+<h2 id="whatisamonadcont.">What is a Monad? (cont.)</h2>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p><code>M</code>: a type constructor that defines, given an underlying type <code>T</code>, how to obtain the corresponding <strong><em>monadic type</em></strong> <code>M[T]</code><br/>
+ ***<br/>
+<code>unit</code>: a unary operation that takes a value <code>t</code> of type <code>T</code> and returns the corresponding <strong><em>monadic value</em></strong> <code>M t</code> of type <code>M[T]</code><br/>
+ ***<br/>
+<code>bind</code>: a binary operation that takes two arguments:
+* a monadic value <code>M t</code> of type <code>M[T]</code>, and
+* a function <code>T -&gt; M[T']</code></p>
+
+<p>|&#8212;|</p>
+
+<p>Note:</p>
+
+<p>!Describe bind: The binding operation can be understood as having four stages:
+i. The monad-related structure on the first argument is &#8220;pierced&#8221; to expose any number of values in the underlying type t.
+ii. The given function is applied to all of those values to obtain values of type (M u).
+iii. The monad-related structure on those values is also pierced, exposing values of type u.
+iv. Finally, the monad-related structure is reassembled over all of the results, giving a single value of type (M u).</p>
+
+<p>Given a type constructor M, in most contexts, a value of type M a can be thought of as an action that returns a value of type a. The return operation takes a value from a plain type a and puts it into a monadic container of type M a; the bind operation chains a monadic value of type M a with a function of type a → M b to create a monadic value of type M bits second argument is a function that maps from the underlying type of the first argument to another monadic type, and its result is in that other monadic type</p>
+
+<blockquote>
+<blockquote>
+<blockquote>
+<h2 id="monadlaws">Monad Laws</h2>
+</blockquote>
+</blockquote>
+</blockquote>
+
+<p><strong><em>Left identity</em></strong><br/>
+(<code>unit</code> a) bind f <strong><code>≡</code></strong> f a<br/>
+***<br/>
+<strong><em>Right identity</em></strong><br/>
+m <code>bind</code> <code>unit</code> <strong><code>≡</code></strong> m<br/>
+***<br/>
+<strong><em>Associativity</em></strong><br/>
+(m <code>bind</code> f) <code>bind</code> g <strong><code>≡</code></strong> m <code>bind</code> (\x -&gt; f x bind g)</p>
+
+<p>Note:</p>
+
+<hr />
+
+<h2 id="stateandmutation">State and mutation</h2>
+
+<p>Pure functional programming doesn&#8217;t allow any state at all</p>
+
+<pre><code class="scala">val x = 5 // x equals 5 forever
+</code></pre>
+
+<p>Treats computation as the evaluation of mathematical functions avoiding <em>state</em> and <em>mutation</em>.</p>
+
+<p>Advantages:
+* concentrate on defining theories for operators expressed as <strong><em>functions</em></strong>,
+* get powerful ways to abstract and compose functions,
+* theories provide simpler reasoning principles
+* orders of magnitude less code than imperative programming (to fail, test, scale)
+* good for exploiting parallelism for multicore and cloud computing</p>
+
+<p>Note:
+Functional programming is about programming:
+* with functions that are values produced, consumed and composed
+* without mutable variables and assignments,
+* without loops and other imperative control structures.</p>
+
+<p>Functions in a FP language are first-class citizens:
+* they can be defined anywhere (even inside other functions),
+* like any other value, they can be passed as parameters to functions and returned as results,
+* as for other values, there exists a set of operators to compose functions.</p>
+
+<p>Some FP languages:
+* Pure Lisp, XSLT, XPath, XQuery, FP (Backus), Haskell
+* Lisp, Scheme, Racket, Clojure, SML, Ocaml, Scala, Smalltalk, Ruby(!)</p>
+
+<p>History of FP Languages
+1959 Lisp
+1975&#8211;77 ML, FP, Scheme
+1978 Smalltalk
+1986 Standard ML
+1990 Haskell, Erlang
+1999 XSLT
+2000 OCaml
+2003 Scala, XQuery
+2005 F#
+2007 Clojure</p>
+
+<hr />
+
+<hr />
+
+<h2 id="side-effects">Side-effects</h2>
+
+<p>Consider expression <em>c++</em>, where <em>c</em> is a variable. We say that the expression has a side effect on the current value of the variable and this sideefect cannot be expressed by the substitution model (there is no simple rewritting rule that can support this expression. Will require something more like a store etc).</p>
+
+<h2 id="λ-calculus">λ-calculus</h2>
+
+<p>Substitution model</p>
+
+<h2 id="traits">Traits</h2>
+
+<p>Scala follows a single inherita</p>
+
+<hr />
+
+<h2 id="references">References</h2>
+
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Church_encoding">Church Encoding</a></li>
+</ul>
+
+<p>Monads
+* <a href="https://channel9.msdn.com/Shows/Going+Deep/Brian-Beckman-Dont-fear-the-Monads">Brian Beckman - Don&#8217;t fear the Monads</a></p>
+
+</body>
+</html>

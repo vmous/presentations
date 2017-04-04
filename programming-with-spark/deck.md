@@ -488,7 +488,7 @@ Why?: Reduces the number of passes it has to take over data by grouping operatio
 val lastYearsLogs: RDD[String] = ... // Humongous dataset
 val firstLogsWithErrors = lastYearsLogs
                             .map(_.lowercase)
-                            .filter(_.contains("ERROR"))
+                            .filter(_.contains("error"))
 							.count
 ```
 
@@ -543,13 +543,15 @@ val res = rdd.groupByKey().map(v => (v._1, v._2.sum)).collect()
 ## Shuffing (3)
 
 ```scala
-val res = rdd.reduceByKey(_+_)
+val res = rdd.reduceByKey(_+_).collect()
 ```
 
 ![reduceByKey](img/reducebykey.png)
 
 >>>
 ## Partitioning
+
+<img style="float: right;" name="SparkContext" src="img/rdd-partitions.svg">
 
 Data within an RDD is split into several ***partitions***
 
@@ -578,7 +580,7 @@ ii. a set of sorted ranges of keys
 Note:
 
 >>>
-## Customized Partitioning
+## Custom Partitioning
 
 Hash partitioning is the default. Partitioning can be changed:
 * explicitly, by calling `partitionBy` on an RDD, providing a `Partitioner`
@@ -586,17 +588,89 @@ Hash partitioning is the default. Partitioning can be changed:
 
 Attention: Customizing partitioning is only possible when working with Pair RDDs (is based on keys).
 
+
+
+>>>
+## Custom Partitioning: `partitionBy`
+
+```scala
+val pairs = purchases.map(p => (p.custId, p.price))
+val customPartitioner = new RangePartitioner(8, pairs)
+val partitioned = pairs.partitionBy(customPartitioner).persist()
+```
+
+Why do we need `persist()`?
+
+Note:
+
+Let's imaging that we have an RDD of purchases which we now want to range partition its data.
+We first create a pair rdd using custormer id as the key and price as value.
+We then create an instance of a RangePartitioner passing the number of partitions we want and a reference to the pair RDD we want to have partitioned.
+Spark is smart enough to sample the pair RDD in order to come up with an optimal selection of key ranges.
+Finally, we simply invoke partitionBy on the pair's RDD, passing our custom range partitioner that we just created.
+
+Note the call to persist(). Why do we need it here? partitionBy is a transformation and when applied all data would be shuffled over the network and partitioned. Remember that Spark's semantics is to lazy evaluate transformations so whenever an action would be applied to the partitioned rdd defined with the last command here, the chain of transformation of this slide would be re-evaluated causing the afforementioned shuffling to occur if we don't tell Spark. That is exactly the role of calling persist() here. Basically what we're doing here is we're saying: once you move the data around in the network and repartition it just keep it where it is. Otherwise, we would find ourselves accidentally re-partitioning our data in every iteration of a machine running algorithm killing the performance of your implementation.
+
+>>>
+## Custom Partitioning: Transformations
+
+Partitioner from parent RDD
+
+Automatically-set partitioners
+
+Tip: `map` and `flatMap` discard Partitioner info! Use `mapValues` and `flatMapValues` instead!
+
+Note:
+It is also possible to partition using transformations. There are basically two ways partitioners can be passed around with transformations.
+In the first case, and probably the most common one, partitioners are passed from parent RDD to its child. That is paire RDDs, which are the result of some transformation on an already partitioned parent paired RDD, is typically configured to use the same HashPartitioner that was used to construct its parent.
+In some other cases, certain transformations automaticaly impose a partitioning that can cause re-partitioning of the data. Of course this is the case usually when it contextually makes sense. For example if you use the sortByKey operation, a RangePartitioner is used because you need ordered keys in order to sort them and the keys once sorted are partitioned such that the similar keys are in the same partition. Conversely, the default partition when using groupByKey is the hash partitioning.
+
 >>>
 ## Why partitioning is important?
 
-[8, 96, 240, 400, 401, 800], #partitions = 4, n.hashCode() = n
+[8, 96, 240, 400, 401, 800], #partitions = 4
 
-Result is not evenly distributed (imbalanced computation, communication overhead)
+<table>
+<tr>
+<td style="vertical-align:middle">![Hash Partitioning](img/hash-partitioning.png)</td><td style="vertical-align:middle"><code>n.hashCode()=n</code><br /><code>p=k%4</code><br />imbalanced</td>
+</tr>
+<tr>
+<td style="vertical-align:middle">![Range Partitioning](img/range-partitioning.png)</td><td style="vertical-align:middle">key ranges<br />more balanced</td>
+</tr>
+</table>
 
 
 Note:
 
+And something wonky happens, this hash partitioning distributes our keys as follows amongst our four partitions. Remember the goal of hash partitioning is to try and evenly spread out the keys, though it's possible to have situations like these where you have an unlucky group of keys that can cause your data. When you're clustered to be unevenly skewed, and for some nodes to have a lot more data, and for some nodes to have none, or a lot less. Of course this means potentially bad performance, because a job could be evenly spread out on four nodes. And in this case, it's basically just spread out on one node, right now, so it's not really very parallel. In this case, since we know the hash partitioning is actually skewed, and since our keys have an ordering and are non-negative.
+
+So here's a scenario where we can more easily distribute our keys through out the cluster, that is we just put the keys in their corresponding ranges. So all keys, between 1 and 200 on the first node, all keys between 201 and 400 on the second node, etc. This is clearly much more balanced and of course we can imagine it being much more performant than before because the work is more evenly spread out.
+
 `groupByKey` causes shuffling and results the resulting RDD to get a range partitioning.
+
+>>>
+## Why partitioning is important? (2)
+
+![Join of a big and a small RDD with no partitioning](img/join-not-partitioned.svg)
+
+Note:
+
+The following example has been... stolen from the "Learning Spark" book and you can find detailed description with code snippets in pages 61 through 64
+
+Consider an application that keeps a large table of user information in memory (largeRDD), say an RDD of (UserId, UserInfo) pairs, where UserInfo contains a list of topics the user is subscribed to. The application periodically needs to join this big table with a smaller RDD of (UserId, LinkInfo) pairs representing events of users clicking on a specific link. That way, for example, we could count how many users vistied a link that was not to one of their subscribed topics.
+
+We can achieve the above we can use Spark's join method to group the UserInfo and LinkInfo pairs for each UserId by key.
+
+If Spark does not know how the keys are partitioned in the datasets this operation will be inefficient. As we already know, by default,this operation will hash all the keys of both datasets sending elements with the same key hash across the network to the same machine and then join together the elements with the same key. Because we expect the user data RDD to be much larger than the small events RDD this shuffling is a waste especially because this join operation is performed every five minutes and the user data do not change.
+
+>>>
+## Why partitioning is important? (3)
+
+![Join of a partitioned big RDD with a small RDD](img/join-partitioned.svg)
+
+Note:
+
+To fix this we only need to specify a hash partitioning for the user info RDD using the partitionBy we saw earlier when we load the dataset. We choose to partition the user info RDD because this is the one that is reused every five minutes without changing. Now, when the join operation is applied, Spark knows in which machines the the user info bits are stored and it only needs to hash and shuffle the small, events, RDD. When the events bits arrive to the nodes join operation is computed right away because the needed user info data are already there. The result is that less data is communicated over the network and the programm runs significantly faster.
 
 >>>
 ## When should I use RDDs?
@@ -608,7 +682,6 @@ Note:
 * you have a very good knowledge of how the platform works and you can handle the optimizations yourself
 
 Note:
-
 you have unstructured data
 you need to fine-tune and manage low-level daetails on RDD computations
 you have complex datra tyopes that cannot be serialized with Encoders
@@ -623,7 +696,7 @@ https://databricks.com/blog/2016/07/14/a-tale-of-three-apache-spark-apis-rdds-da
 ## Motivation example
 
 ```scala
-rdd1.join(rdd2).filter(<predicates>).count
+rdd1.join(rdd2).filter(<predicates_rdd1_rdd2>).count
 ```
 ```scala
 val filtered = rdd2.filter(<predicate_rdd2>)
@@ -636,6 +709,12 @@ cartesian.filter { <join_predicate> }
   .filter { <predicates> }.count
 ```
 ~180x slower than the first!
+
+Note:
+
+Before we go into details on the new Spark SQL API let's see a few examples that will motivate the rest of the content in this section.
+
+Let say that we have two RDDs, rdd1 and rdd2, and we join them together to count the data that fulfill a set of prodicates on both RDDs. That can be written as the first one liner in this slide. It's intuitive that we can get things to run faster if we join the filtered versions of the RDDs because in that case we join less data together. This leads to the second snippet shown here and to 4x reduction in run time. On the other extreme, one could implement the join operation herself using the cartesian function... accidentally increasing the runtime by about 180 times.
 
 >>>
 ## Unstructured vs Structured
@@ -651,9 +730,10 @@ Databases can be highly optimized:
 * an optimizer can do the work for us
 
 Note:
-User defined funciton literals on opaque data structures. Optimiz
 
-Highly optimized dedicated declarative transformations over columns of named and typed values.
+The RDD API is a low level API which is very powerful but requires programmers to have detailed understanding on how Spark works under the hood. Data, in the form or RDDs, and computations, in the form of lambda transformation, are quite opaque to Spark and the programmer is expected to optimize her code and avoid pitfalls like the examples we saw in the previous slide.
+
+In a more structured setting, we can cede some of the flexibility of the RDD API to have strictly defined, named and typed data and allow a certain set of declarative transformations on those data. Decades of academic and industry research in the area of Databases can be leveraged to take advantage of such structure to automatically optimize execution of data transformations regardless of how the operation is written by the user.
 
 >>>
 ## Spark SQL
@@ -664,8 +744,12 @@ Easy SQL-like API that allows Spark to optimize execution plans.
 
 Caveat: Give up freedom, flexibility and generality of the λ-collections API
 
+Note:
+
+Here is where Spark SQL comes into play. It leverages the fact that SQL is the de-facto language for data analytics to provide a modern and easy API that allows Spark to transparently optimize how things get executed. As briefly mentioned earlier this is provided with the caveat that with the SQL declarative vocabulary we give up the freedom and expressive power of free-flow functional data transformations.
+
 >>>
-## Spark SQL
+## What is Spark SQL exactly
 
 Three main APIs
 * SQL literal syntax
@@ -675,6 +759,12 @@ Three main APIs
 Backend components:
 * ***Catalyst***: a query optimizer
 * ***Tungsten***: an off-heap serializer
+
+Note:
+
+Spark SQL is two things. First, a set of APIs: an SQL literal syntax and the Dataset/DataFrame APIs. Second, a couple of backend components that enable optimization, namelly Catalyst which is a query optimizer and Tungsten an off-heap serializer for compressed and optimizes data storage in memory.
+
+In the rest of the section we will go through each of the above in a bit more detail.
 
 >>>
 ## A DataFrame is...
@@ -1060,6 +1150,10 @@ Note:
 
 >>>
 ## Partitioning
+
+
+Tip: `map` and `flatMap` loose Partitioner info! Use `mapValues` and `flatMapValues` instead!
+
 
 Communication is very expenisve, so laying out data to minimize network traffic can greatly inprove performance.
 
